@@ -26,59 +26,6 @@ export class UsersService {
         this.logger = new Logger('Bootstrap');
     }
 
-    async onModuleInit() {
-        await this.createDefaultRoles();
-    }
-
-    private async createDefaultRoles() {
-        const userRole = await this.roleRepository.findOne({ where: { name: ROLES.USER } });
-        const userAdmin = await this.roleRepository.findOne({ where: { name: ROLES.USER } });
-
-        if (!userRole) {
-            throw new InternalServerErrorException('Rol "user" no encontrado - defaultUsers');
-        }
-
-        if (!userAdmin) {
-            throw new InternalServerErrorException('Rol "admin" no encontrado - defaultUsers');
-        }
-
-        const defaultUsers = [{
-            username: 'Marlon Torres Lozano',
-            email: 'marlon@gmail.com',
-            password: 'semeolvido',
-            role: userRole
-        },
-        {
-            username: 'Default admin',
-            email: 'admin@gmail.com',
-            password: 'semeolvido',
-            role: userAdmin
-        }];
-
-        for (const defaultUser of defaultUsers) {
-            const userExists = await this.userRepository.findOne({ where: { email: defaultUser.email } });
-
-            if (!userExists) {
-                const hashedPassword = await bcrypt.hash(defaultUser.password, 10);
-
-                const userCreated = this.userRepository.create({
-                    username: defaultUser.username,
-                    email: defaultUser.email,
-                    password: hashedPassword
-                });
-
-                const savedUser = await this.userRepository.save(userCreated);
-
-                const assignedRole = this.assignedRoleRepository.create({
-                    user: savedUser,
-                    role: userRole,
-                });
-
-                await this.assignedRoleRepository.save(assignedRole);
-            }
-        }
-    }
-
     async register(createUserDto: CreateUserDto): Promise<User> {
         const role = await this.roleRepository.findOne({ where: { name: ROLES.USER } });
 
