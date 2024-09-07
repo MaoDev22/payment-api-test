@@ -52,9 +52,7 @@ import { TransactionDetail } from '@app/modules/transactions/transaction-detail.
         database: configService.get<string>('DB_NAME'),
         entities: [Role, User, AssignedRole, Product, Transaction, TransactionDetail],
         synchronize: true,
-        ssl: {
-          rejectUnauthorized: false,
-        }
+        ssl: configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false
       }),
     }),
     AuthModule,
